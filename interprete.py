@@ -32,7 +32,7 @@ BIN = {
 }
 UNA = {
     'NEG': lambda a: _entero_32(-a), 'NO': lambda a: not a,
-    'ENT_A_DEC': float, 'ENT_A_TXT': str,
+    'ENT_A_DEC': float, 'DEC_A_ENT': int, 'ENT_A_TXT': str,
     'DEC_A_TXT': lambda a: f"{a:.2f}", 'LOG_A_TXT': lambda a: 'verdadero' if a else 'falso',
 }
 

@@ -1,0 +1,14 @@
+// Ejemplo breve para la demostración de TopScript.
+presupuesto "Control de comida" {
+  categoria comida limite 1000.00 {
+    gasto 450.50 descripcion "supermercado";
+    gasto 620.00 descripcion "comida y cena";
+  }
+
+  mostrar("Gastado en comida: " + comida.gastado);
+  si (comida.gastado > comida.limite) {
+    alerta("Limite excedido");
+  } sino {
+    mostrar("Dentro del limite");
+  }
+}

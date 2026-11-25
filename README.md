@@ -1,77 +1,122 @@
-# TopScript — compilador (modelo base)
+# TopScript
 
-Repositorio: [automasII](https://github.com/22161258-cmd/automasII).
+TopScript es un compilador académico para un lenguaje de dominio específico de presupuestos personales. Analiza programas, valida tipos y ámbitos, genera cuádruplos, aplica optimizaciones y permite ejecutarlos con un intérprete de referencia o generar ensamblador NASM x86 de 32 bits.
 
-Lenguaje de dominio específico para presupuestos personales. Este código es el **modelo base** del compilador:
-ya recorre todas las fases, de texto fuente a cuádruplos y ejecución de referencia. Algunas fases están
-solo como esqueleto para que las complete cada integrante (ver `TAREAS.md`).
+Repositorio: [22161258-cmd/automasII](https://github.com/22161258-cmd/automasII).
 
-## Cómo correrlo
+## Requisitos
+
+- Python 3.8 o posterior.
+- PLY, instalado desde `requirements.txt`.
+- Para ensamblar y ejecutar código objeto: NASM y GNU `ld` en Linux o WSL. El ensamblador generado usa llamadas al sistema Linux de 32 bits; no se ejecuta de forma nativa en Windows.
+
+## Instalación
+
+Desde la raíz del proyecto:
+
+```bash
+python -m pip install -r requirements.txt
 ```
-pip install -r requirements.txt          # instala PLY
+
+Comprueba que el compilador funciona con el ejemplo incluido:
+
+```bash
 python main.py tests/execution/presupuesto_basico.top
-python main.py programa.top --tokens --ast --tabla --cuadruplos --opt --notacion --costos
-python main.py tests/execution/fibonacci.top --correr-asm      # ensambla y ejecuta en x86 real
-python notaciones.py "ingreso - (total + 50) * 2"              # convertidor suelto
-python run_tests.py                      # corre toda la suite (incluye pruebas aleatorias)
 ```
-| Opción | Qué muestra |
-|---|---|
-| `--tokens` | tokens del analizador léxico |
-| `--ast` | árbol anotado con tipos (incluye las conversiones implícitas) |
-| `--tabla` | tabla de símbolos y de direcciones |
-| `--cuadruplos` | código intermedio (con `--opt`, ya optimizado) |
-| `--opt` | aplica los pases del optimizador |
-| `--costos` | tabla de costos antes y después de optimizar (estáticos y de ejecución) |
-| `--notacion` | cada expresión en notación infija, postfija y prefija |
-| `--asm FILE` | escribe el ensamblador x86 (NASM, 32 bits, Linux) |
-| `--correr-asm` | ensambla con `nasm` y `ld`, ejecuta y compara con el intérprete de referencia |
 
-## Fases y módulos
-| Fase | Módulo | Estado |
-|---|---|---|
-| Léxico | `lexer.py` | listo |
-| Sintáctico (GLC → árbol) | `parser.py`, `ast_nodes.py` | listo (falta `para cada`) |
-| Semántico (Tema 1) | `semantico.py`, `tabla_simbolos.py`, `errores.py` | base lista |
-| Código intermedio (Tema 2) | `codigo_intermedio.py`, `notaciones.py` | cuádruplos de expresiones, categorías, `si`, `mientras`, **funciones (FUNC/PARAM/CALL/RETORNAR)**; conversión de notaciones |
-| Optimización (Tema 3) | `optimizador.py` | 6 pases + medición de costos; faltan técnicas globales (subexpresiones comunes, etc.) |
-| Código objeto (Tema 4) | `codigo_objeto.py`, `ensamblar.py` | x86 real para enteros, **decimales (centavos)**, lógicos, texto y **funciones con recursión**; **asignación de registros (EBX, ESI, EDI, EBP)** |
-| Referencia | `interprete.py` | ejecuta los cuádruplos y cuenta costos |
-| Pruebas | `run_tests.py`, `pruebas_unitarias.py`, `tests/` | suite fija + programas aleatorios |
+## Ejemplo mínimo
 
-Requisito extra para el ensamblador: `nasm` y `ld` (Linux, o WSL en Windows). **Pendiente de confirmar con el profesor:** ¿acepta entregar/ejecutar esta parte usando Linux o WSL con NASM?
-
-## Resumen del lenguaje
-```
+```topscript
 presupuesto "Octubre" {
-  decimal ingreso = 5000.0;
-  constante decimal IVA = 0.16;
-  categoria comida limite 1000.0 {        // abre un ámbito propio
-    gasto 450.50 descripcion "super";     // suma a comida.gastado
+  decimal ingreso = 5000.00;
+  categoria comida limite 1000.00 {
+    gasto 450.50 descripcion "supermercado";
+    gasto 620.00 descripcion "comida y cena";
   }
-  si (comida.gastado > comida.limite) { alerta("Excedido"); } sino { mostrar("OK"); }
-  funcion decimal doble(decimal x) { retornar x * 2; }
+  si (comida.gastado > comida.limite) {
+    alerta("Limite de comida excedido");
+  } sino {
+    mostrar("Comida dentro del limite");
+  }
+  mostrar("Gastado: " + comida.gastado);
+  mostrar("Disponible: " + (ingreso - comida.gastado));
 }
 ```
-- Tipos: `entero`, `decimal`, `texto`, `logico`; `entero → decimal` se convierte solo (casting implícito).
-- Los valores `entero` usan aritmética con signo de 32 bits; los desbordamientos envuelven como en x86.
-- `+` con un `texto` concatena (convierte el otro operando). `/` siempre da `decimal`.
-- Atributos de categoría: `.limite`, `.gastado`, `.nombre`.
-- Palabras reservadas, incluidas `y`, `o`, `no`: no se pueden usar como nombres de variable.
-- Extensión de los archivos fuente: `.top`.
 
-## Decimales y funciones en el ensamblador (novedades)
-- **Decimales = enteros en centavos** (`12.34` -> `1234`). `+ - < > == ...` son las mismas instrucciones que para enteros;
-  `*` y `/` usan las rutinas `mul_dec` y `div_dec` (producto de 64 bits, redondeo al centavo). Rango ±21 474 836.47.
-  Las constantes con más de 2 decimales se redondean al centavo; el intérprete usa `float`, así que en cadenas largas
-  de operaciones el último centavo puede diferir.
-- **Funciones**: `(FUNC, nombre, (params), (locales))`, `(PARAM, v)`, `(CALL, nombre, n, t)`, `(RETORNAR, v)`.
-  Quien llama guarda las variables de la función llamada (pila) y las restaura al volver; así funciona la recursión
-  tanto en el intérprete como en el x86. `tests/execution/factorial_funcion.top`, `funciones.top` y `decimales.top`.
-- Texto en x86: `CONCAT`, conversiones a texto y `==`/`!=` entre textos (buffers de 256 bytes).
-- **Asignación de registros** (`codigo_objeto.py`, `asignar_registros`): intervalos de vida + barrido lineal sobre EBX/ESI/EDI/EBP;
-  las variables que toca una función se consideran vivas en todo el programa; ciclos extienden el intervalo; si faltan
-  registros se deja en memoria la de menor peso. Una comparación seguida de `SI_FALSO` se fusiona en `cmp` + salto.
-  `--sin-registros` en `main.py` (o `registros=False` en `generar_asm`) deja todo en memoria para comparar. El encabezado del
-  `.asm` lista qué variable quedó en qué registro.
-- Pendiente: `para (cada x en presupuesto)` (el parser aún no lo tiene; `octubre.top` lo usa).
+Guárdalo como `ejemplo.top` y ejecútalo con:
+
+```bash
+python main.py ejemplo.top
+```
+
+## Línea de comandos
+
+```text
+python main.py ARCHIVO.top [opciones]
+```
+
+| Opción | Descripción |
+|---|---|
+| `--tokens` | Muestra los tokens del lexer. |
+| `--ast` | Muestra el árbol sintáctico con tipos y conversiones implícitas. |
+| `--tabla` | Muestra la tabla de símbolos y direcciones. |
+| `--cuadruplos` | Muestra el código intermedio. |
+| `--notacion` | Muestra expresiones en notación infija, prefija y postfija. |
+| `--opt` | Ejecuta optimizaciones antes de mostrar/ejecutar el programa. |
+| `--costos` | Compara métricas de código antes y después de optimizar. |
+| `--asm ARCHIVO.asm` | Escribe ensamblador x86 NASM. |
+| `--correr-asm` | Ensambla, enlaza y ejecuta; compara la salida con el intérprete. |
+| `--sin-registros` | Genera ensamblador sin asignación de variables a registros. |
+| `--no-ejecutar` | Compila sin ejecutar el intérprete de referencia. |
+
+Las opciones de inspección se pueden combinar. Por ejemplo:
+
+```bash
+python main.py ejemplo.top --tabla --cuadruplos --opt --costos
+python main.py ejemplo.top --asm ejemplo.asm
+python main.py ejemplo.top --correr-asm
+```
+
+## Pruebas
+
+Ejecuta la suite disponible desde la raíz del proyecto:
+
+```bash
+python run_tests.py
+```
+
+Incluye pruebas unitarias y programas de ejemplo organizados por fase. Algunas pruebas de ensamblador requieren NASM, `ld` y Linux/WSL.
+
+## Estructura del proyecto
+
+| Archivo o carpeta | Responsabilidad |
+|---|---|
+| `main.py` | Interfaz de línea de comandos y coordinación de fases. |
+| `lexer.py`, `parser.py`, `ast_nodes.py` | Análisis léxico, sintáctico y nodos del AST. |
+| `semantico.py`, `tabla_simbolos.py`, `errores.py` | Tipos, ámbitos, símbolos y diagnósticos. |
+| `codigo_intermedio.py`, `notaciones.py` | Generación de cuádruplos y notaciones de expresiones. |
+| `optimizador.py` | Pases de optimización e informe de costos. |
+| `interprete.py` | Intérprete de referencia de los cuádruplos. |
+| `codigo_objeto.py`, `ensamblar.py` | Generación y ejecución de ensamblador x86 en Linux. |
+| `pruebas_unitarias.py`, `run_tests.py`, `tests/` | Pruebas y programas de muestra. |
+| `requirements.txt` | Dependencias de Python. |
+
+## Limitaciones conocidas
+
+| Limitación | Detalle |
+|---|---|
+| Iteración `para cada` | No está implementada. Se puede usar `mientras`. |
+| Conversiones explícitas | El parser no tiene sintaxis como `entero(x)` o `texto(x)`. Las conversiones internas incluyen `DEC_A_ENT`, pero no se pueden solicitar desde un programa fuente con casting explícito. |
+| Aritmética decimal entre intérprete y ensamblador | El intérprete usa `float`; el ensamblador representa decimales como centavos enteros y redondea multiplicación/división al centavo. En cadenas largas de operaciones puede diferir el último centavo. |
+| Rango de enteros en ensamblador | Enteros con signo de 32 bits: −2³¹ a 2³¹−1. Las constantes fuera de rango se rechazan al generar ensamblador. El intérprete emula el desbordamiento de 32 bits en asignaciones y operaciones enteras. |
+| Rango decimal en ensamblador | Aproximadamente ±21,474,836.47, por la representación en centavos de 32 bits. |
+| Texto en ensamblador | Los buffers de conversión/concatenación admiten hasta 255 caracteres y truncan texto más largo. |
+| Identificadores internos | Nombres de usuario con patrón `t<N>` o `L<N>` se renombran para evitar colisiones con temporales y etiquetas generados. |
+| Palabras reservadas | Palabras del lenguaje como `limite`, `mientras`, `y` y `no` no pueden usarse como identificadores. |
+| Recuperación sintáctica | El parser informa el primer error sintáctico para evitar mensajes en cascada; no continúa recuperando múltiples errores en una misma compilación. |
+| Métricas de escrituras | `Memoria.escrituras` es atributo de clase; al medir varias ejecuciones en el mismo proceso las escrituras pueden acumularse. |
+| Plataforma de ensamblador | La salida es NASM ELF de 32 bits para Linux y requiere `nasm` + `ld`; en Windows se debe usar WSL. |
+
+## Formato y BOM UTF-8
+
+Los archivos fuente usan extensión `.top` y codificación UTF-8. El lexer ignora un BOM UTF-8 inicial, por lo que también acepta archivos guardados con ese marcador en Windows.

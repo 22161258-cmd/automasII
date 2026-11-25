@@ -3,7 +3,7 @@
 ALCANCE ACTUAL
   Soportado: entero, decimal, logico y texto; + - * /, comparaciones (incluye == y != entre textos),
              Y O NO, NEG, asignación, saltos (SALTA, SI_FALSO, LABEL), conversiones (ENT_A_DEC,
-             ENT_A_TXT, DEC_A_TXT, LOG_A_TXT), CONCAT, MOSTRAR_/ALERTA_ de ENT, DEC, LOG y TXT,
+             DEC_A_ENT, ENT_A_TXT, DEC_A_TXT, LOG_A_TXT), CONCAT, MOSTRAR_/ALERTA_ de ENT, DEC, LOG y TXT,
              categorías (son variables 'cat.limite', 'cat.gastado', 'cat.nombre') y funciones
              (FUNC, PARAM, CALL, RETORNAR) con recursión.
 REPRESENTACIÓN DE LOS DECIMALES  (punto fijo: enteros en CENTAVOS)
@@ -49,7 +49,7 @@ class NoSoportadoAsm(NotImplementedError):
 
 
 DEFINEN = {'=', '+', '-', '*', '/', '<', '>', '<=', '>=', '==', '!=', 'Y', 'O', 'NEG', 'NO',
-           'ENT_A_DEC', 'ENT_A_TXT', 'DEC_A_TXT', 'LOG_A_TXT', 'CONCAT', 'CALL'}
+           'ENT_A_DEC', 'DEC_A_ENT', 'ENT_A_TXT', 'DEC_A_TXT', 'LOG_A_TXT', 'CONCAT', 'CALL'}
 SALIDAS = {f"{c}_{t}" for c in ('MOSTRAR', 'ALERTA') for t in ('ENT', 'DEC', 'LOG', 'TXT')}
 SOPORTADAS = DEFINEN | SALIDAS | {'LABEL', 'SALTA', 'SI_FALSO', 'FUNC', 'PARAM', 'RETORNAR'}
 INSTR = {'+': 'add', '-': 'sub', '*': 'imul', 'Y': 'and', 'O': 'or'}
@@ -695,6 +695,9 @@ def generar_asm(quads, tabla, tipos_temp, registros=True):
             else:
                 t = destino(r)
                 emite([f"imul {t}, {sa}, 100"] + (guarda(r) if t == 'eax' else []))
+        elif o == 'DEC_A_ENT':
+            # Los decimales se guardan como centavos: dividir entre 100 trunca hacia cero.
+            emite([f"mov eax, {src(a)}", "cdq", "mov ecx, 100", "idiv ecx"] + guarda(r))
         elif o in ('ENT_A_TXT', 'DEC_A_TXT'):
             llama("fmt_int" if o == 'ENT_A_TXT' else "fmt_dec", f"b_{_etq(r)}", src(a))
             emite(asigna(r, f"b_{_etq(r)}"))
