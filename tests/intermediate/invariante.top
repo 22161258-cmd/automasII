@@ -1,0 +1,13 @@
+// n * 2 y k * 4 no cambian dentro del ciclo: deben calcularse una sola vez
+presupuesto "Invariantes" {
+  entero n = 5;
+  entero k = 3;
+  entero i = 0;
+  entero total = 0;
+  mientras (i < n * 2) {
+    total = total + k * 4;
+    i = i + 1;
+  }
+  mostrar(total);
+  mostrar(i);
+}

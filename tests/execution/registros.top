@@ -1,0 +1,61 @@
+// Presión de registros: más variables vivas que registros, ciclos anidados, llamadas dentro de ciclos,
+// recursión con acumulador, decimales y texto
+presupuesto "Registros" {
+  entero a = 1;
+  entero b = 2;
+  entero c = 3;
+  entero d = 4;
+  entero e = 5;
+  entero f = 6;
+  entero g = 7;
+  decimal total = 0.0;
+  texto acta = "";
+  entero contador = 0;
+
+  funcion entero suma(entero n) {
+    si (n <= 0) { retornar 0; }
+    contador = contador + 1;
+    retornar n + suma(n - 1);
+  }
+
+  funcion decimal acumula(decimal x, entero veces) {
+    decimal r = 0.0;
+    entero k = 0;
+    mientras (k < veces) {
+      r = r + x * 1.5;
+      k = k + 1;
+    }
+    retornar r;
+  }
+
+  entero i = 0;
+  mientras (i < 4) {
+    entero j = 0;
+    mientras (j < 3) {
+      a = a + b * j;
+      b = b + c - d;
+      c = c + e;
+      d = d + f - g;
+      e = e + 1;
+      f = f + i;
+      g = g + suma(j) + a - a;
+      total = total + acumula(2.5, j + 1);
+      acta = acta + i + ".";
+      j = j + 1;
+    }
+    mostrar(a + b + c + d + e + f + g);
+    i = i + 1;
+  }
+  mostrar(a);
+  mostrar(b);
+  mostrar(c);
+  mostrar(d);
+  mostrar(e);
+  mostrar(f);
+  mostrar(g);
+  mostrar(total);
+  mostrar(acta);
+  mostrar(contador);
+  mostrar(suma(10));
+  si (a > b y c < d o e == f) { mostrar("rama 1"); } sino { mostrar("rama 2"); }
+}

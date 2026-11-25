@@ -1,0 +1,15 @@
+// base * 2 es invariante en los dos ciclos; i * 3 solo en el interno
+presupuesto "Anidados" {
+  entero base = 7;
+  entero i = 0;
+  entero suma = 0;
+  mientras (i < 3) {
+    entero j = 0;
+    mientras (j < 4) {
+      suma = suma + base * 2 + i * 3;
+      j = j + 1;
+    }
+    i = i + 1;
+  }
+  mostrar(suma);
+}

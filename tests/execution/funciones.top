@@ -1,0 +1,57 @@
+// Funciones: recursión, varios parámetros, decimales, texto, globales y llamadas anidadas
+presupuesto "Funciones" {
+  entero llamadas = 0;
+
+  funcion entero fib(entero n) {
+    llamadas = llamadas + 1;
+    si (n < 2) { retornar n; }
+    retornar fib(n - 1) + fib(n - 2);
+  }
+
+  funcion decimal conIva(decimal monto, decimal tasa) {
+    decimal iva = monto * tasa;
+    retornar monto + iva;
+  }
+
+  funcion entero suma3(entero a, entero b, entero c) {
+    retornar a + b * 10 + c * 100;
+  }
+
+  funcion texto etiqueta(texto nombre, decimal monto) {
+    retornar nombre + ": " + monto;
+  }
+
+  funcion entero potencia(entero base, entero exp) {
+    entero r = 1;
+    mientras (exp > 0) {
+      r = r * base;
+      exp = exp - 1;
+    }
+    retornar r;
+  }
+
+  funcion logico excede(decimal gastado, decimal tope) {
+    retornar gastado > tope;
+  }
+
+  funcion decimal reparte(decimal total, entero personas) {
+    retornar total / personas;
+  }
+
+  mostrar(fib(10));
+  mostrar(llamadas);
+  mostrar(conIva(100.0, 0.16));
+  mostrar(suma3(1, 2, 3));
+  mostrar(suma3(suma3(1, 0, 0), 2, potencia(2, 3)));
+  mostrar(etiqueta("Total", conIva(250.50, 0.16)));
+  mostrar(potencia(3, 4));
+  mostrar(excede(120.0, 100.0));
+  mostrar(excede(50, 100));
+  mostrar(reparte(100.0, 3));
+  entero i = 0;
+  mientras (i < 3) {
+    mostrar(potencia(2, i) + fib(i + 3));
+    i = i + 1;
+  }
+  conIva(1.0, 1.0);
+}

@@ -1,0 +1,10 @@
+// 10! con un ciclo mientras (solo enteros)
+presupuesto "Factorial" {
+  entero n = 10;
+  entero resultado = 1;
+  mientras (n > 1) {
+    resultado = resultado * n;
+    n = n - 1;
+  }
+  mostrar(resultado);
+}

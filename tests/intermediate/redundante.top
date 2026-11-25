@@ -1,0 +1,26 @@
+// Código redundante: copias, identidades, constantes, variable muerta y ramas imposibles
+presupuesto "Redundante" {
+  entero a = 4;
+  entero b = a;
+  entero c = b + 0;
+  entero d = c * 1;
+  entero e = d * 2;
+  entero f = 2 + 3 * 4;
+  entero muerto = a * 99;
+  logico v = verdadero y (a > 3);
+  logico w = falso o v;
+  mostrar(e);
+  mostrar(f);
+  mostrar(w);
+  si (falso) {
+    mostrar(111);
+  } sino {
+    mostrar(222);
+  }
+  mientras (falso) {
+    mostrar(333);
+  }
+  si (a == 4) {
+    mostrar(444);
+  }
+}

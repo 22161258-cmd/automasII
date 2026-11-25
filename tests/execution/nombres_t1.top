@@ -1,0 +1,14 @@
+// Variables llamadas igual que los temporales del compilador (t1, t2...) o con sufijos parecidos
+presupuesto "Nombres" {
+  entero t1 = 5;
+  entero t1_2 = 7;
+  entero t2 = t1 + t1_2;
+  si (verdadero) {
+    entero t1 = 9;
+    mostrar(t1);
+  }
+  mostrar(t1);
+  mostrar(t1_2);
+  mostrar(t2);
+  mostrar(t1 * t2 + t1_2);
+}

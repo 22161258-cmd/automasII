@@ -1,0 +1,15 @@
+// Nombres que coinciden con registros, etiquetas o rutinas del ensamblador
+presupuesto "Nombres" {
+  entero eax = 3;
+  entero ax = 4;
+  entero al = 5;
+  entero esp = 6;
+  entero L1 = 7;
+  entero s0 = 8;
+  entero nl = 9;
+  entero numbuf = 10;
+  entero print_int = 11;
+  entero _start = 12;
+  mostrar(eax + ax + al + esp + L1 + s0 + nl + numbuf + print_int + _start);
+  mostrar(eax * ax - al);
+}

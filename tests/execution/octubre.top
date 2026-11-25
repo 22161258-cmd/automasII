@@ -1,0 +1,33 @@
+// Demostracion de declaraciones, expresiones, categorias y control de flujo.
+presupuesto "Octubre" {
+  decimal ingreso = 5000.00;
+  entero visitas = 2;
+  logico avisar = verdadero;
+  texto saludo = "Control de gastos";
+  decimal calculo = 10.00 + 2.00 * 3.00;
+
+  categoria comida limite ingreso * 0.20 {
+    gasto 450.50 descripcion "Supermercado";
+    gasto 120 descripcion "Comida corrida";
+  }
+  categoria transporte limite 600.00 {
+    gasto 80 descripcion "Autobus";
+  }
+
+  mostrar(saludo);
+  mostrar(calculo);
+  mostrar(comida.gastado);
+  si (comida.gastado > comida.limite y avisar) {
+    alerta("Se excedio el presupuesto de comida");
+  } sino {
+    mostrar("Comida se mantiene dentro del limite");
+  }
+  para (cada cat en presupuesto) {
+    mostrar(cat.nombre);
+    mostrar(cat.gastado);
+  }
+  mientras (visitas > 0) {
+    mostrar(visitas);
+    visitas = visitas - 1;
+  }
+}

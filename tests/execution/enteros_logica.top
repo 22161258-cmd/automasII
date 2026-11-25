@@ -1,0 +1,32 @@
+// Enteros, lógicos, texto, comparaciones, y/o/no, si/sino y ciclo
+presupuesto "Enteros y logica" {
+  entero a = 7;
+  entero b = -3;
+  entero c = a * b + 20 - (a - b);
+  logico p = a > b;
+  logico q = no p o (c == 1);
+  texto saludo = "Hola, límite ñ";
+  mostrar(saludo);
+  mostrar(c);
+  mostrar(-c);
+  mostrar(p);
+  mostrar(q);
+  mostrar(a >= 7 y b <= -3);
+  mostrar(a != b);
+  mostrar(2147483647);
+  mostrar(-2147483647);
+  si (p y no q) {
+    alerta("p verdadero y q falso");
+  } sino {
+    mostrar("otro caso");
+  }
+  entero i = 0;
+  mientras (i < 3) {
+    si (i == 1) {
+      mostrar("uno");
+    } sino {
+      mostrar(i);
+    }
+    i = i + 1;
+  }
+}
