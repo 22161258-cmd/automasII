@@ -8,6 +8,15 @@ class ErrorEjecucion(Exception):
     pass
 
 
+MIN32, MAX32 = -(2 ** 31), 2 ** 31 - 1
+
+
+def _entero_32(valor):
+    """Emula el desbordamiento con signo de 32 bits del código x86 generado."""
+    valor = int(valor) & 0xFFFFFFFF
+    return valor - 0x100000000 if valor >= 0x80000000 else valor
+
+
 def _div(a, b):
     if b == 0:
         raise ErrorEjecucion("división entre cero")
@@ -15,13 +24,14 @@ def _div(a, b):
 
 
 BIN = {
-    '+': lambda a, b: a + b, '-': lambda a, b: a - b, '*': lambda a, b: a * b, '/': _div,
+    '+': lambda a, b: _entero_32(a + b), '-': lambda a, b: _entero_32(a - b),
+    '*': lambda a, b: _entero_32(a * b), '/': _div,
     '<': lambda a, b: a < b, '>': lambda a, b: a > b, '<=': lambda a, b: a <= b,
     '>=': lambda a, b: a >= b, '==': lambda a, b: a == b, '!=': lambda a, b: a != b,
     'Y': lambda a, b: a and b, 'O': lambda a, b: a or b, 'CONCAT': lambda a, b: a + b,
 }
 UNA = {
-    'NEG': lambda a: -a, 'NO': lambda a: not a,
+    'NEG': lambda a: _entero_32(-a), 'NO': lambda a: not a,
     'ENT_A_DEC': float, 'ENT_A_TXT': str,
     'DEC_A_TXT': lambda a: f"{a:.2f}", 'LOG_A_TXT': lambda a: 'verdadero' if a else 'falso',
 }
@@ -80,7 +90,8 @@ class Interprete:
                 if not self.val(q.arg1):
                     pc = etiquetas[q.res]
             elif op == '=':
-                self.mem[q.res] = self.val(q.arg1)
+                valor = self.val(q.arg1)
+                self.mem[q.res] = _entero_32(valor) if isinstance(valor, int) and not isinstance(valor, bool) else valor
             elif op == 'PARAM':
                 args.append(self.val(q.arg1))
             elif op == 'CALL':

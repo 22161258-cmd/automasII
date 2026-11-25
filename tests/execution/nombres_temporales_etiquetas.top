@@ -1,0 +1,11 @@
+// Los identificadores del usuario no deben colisionar con t<N> ni L<N>.
+presupuesto "Nombres reservados" {
+  entero L1 = 3;
+  entero t1 = 4;
+  mostrar(L1);
+  mostrar(t1);
+  mientras (L1 > 0) {
+    L1 = L1 - 1;
+  }
+  mostrar(L1);
+}

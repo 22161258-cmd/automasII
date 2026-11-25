@@ -45,10 +45,9 @@ class TablaSimbolos:
         self.en_funcion = False
 
     def _id_unico(self, nombre):
-        """Nombre sin ambigüedad para los cuádruplos: nunca repetido y nunca de la forma t<N>
-        (esos nombres son de los temporales que genera el compilador)."""
+        """Nombre sin colisiones con temporales t<N> ni etiquetas L<N>."""
         cand, n = nombre, 1
-        while cand in self._ids or re.fullmatch(r"t\d+", cand):
+        while cand in self._ids or re.fullmatch(r"(?:t|L)\d+", cand):
             n += 1
             cand = f"{nombre}_{n}"
         self._ids.add(cand)

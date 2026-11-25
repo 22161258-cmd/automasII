@@ -39,7 +39,7 @@ python run_tests.py                      # corre toda la suite (incluye pruebas 
 | Referencia | `interprete.py` | ejecuta los cuádruplos y cuenta costos |
 | Pruebas | `run_tests.py`, `pruebas_unitarias.py`, `tests/` | suite fija + programas aleatorios |
 
-Requisito extra para el ensamblador: `nasm` y `ld` (Linux, o WSL en Windows).
+Requisito extra para el ensamblador: `nasm` y `ld` (Linux, o WSL en Windows). **Pendiente de confirmar con el profesor:** ¿acepta entregar/ejecutar esta parte usando Linux o WSL con NASM?
 
 ## Resumen del lenguaje
 ```
@@ -54,6 +54,7 @@ presupuesto "Octubre" {
 }
 ```
 - Tipos: `entero`, `decimal`, `texto`, `logico`; `entero → decimal` se convierte solo (casting implícito).
+- Los valores `entero` usan aritmética con signo de 32 bits; los desbordamientos envuelven como en x86.
 - `+` con un `texto` concatena (convierte el otro operando). `/` siempre da `decimal`.
 - Atributos de categoría: `.limite`, `.gastado`, `.nombre`.
 - Palabras reservadas, incluidas `y`, `o`, `no`: no se pueden usar como nombres de variable.

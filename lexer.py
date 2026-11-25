@@ -40,6 +40,11 @@ t_COMMA = r','
 t_ignore = ' \t\r'
 
 
+def t_BOM(t):
+    r'\ufeff'
+    pass
+
+
 def t_COMMENT(t):
     r'//[^\n]*'
     pass

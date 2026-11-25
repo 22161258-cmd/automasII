@@ -1,0 +1,77 @@
+// Plan mensual para corregir un déficit y evitar nuevos sobregastos.
+// Separa primero gastos esenciales, calcula el ahorro posible y aplica
+// recortes graduales al ocio si las metas no caben en el ingreso.
+presupuesto "Plan de rescate mensual" {
+  decimal ingreso = 18500.00;
+  decimal meta_ahorro = 1500.00;
+  decimal reserva_emergencia = 600.00;
+
+  categoria vivienda limite 7200.00 {
+    gasto 7200.00 descripcion "renta y mantenimiento";
+  }
+  categoria servicios limite 2200.00 {
+    gasto 1450.00 descripcion "luz agua internet y telefono";
+  }
+  categoria alimentos limite 4200.00 {
+    gasto 3900.00 descripcion "supermercado y comida";
+  }
+  categoria transporte limite 1800.00 {
+    gasto 1600.00 descripcion "transporte y gasolina";
+  }
+  categoria deudas limite 3000.00 {
+    gasto 2800.00 descripcion "pago minimo mas abono a capital";
+  }
+  categoria ocio limite 1200.00 {
+    gasto 950.00 descripcion "salidas y suscripciones";
+  }
+
+  decimal esenciales = vivienda.gastado + servicios.gastado + alimentos.gastado + transporte.gastado;
+  decimal gastos_fijos = esenciales + deudas.gastado;
+  decimal disponible = ingreso - gastos_fijos;
+  decimal ahorro_actual = disponible - ocio.gastado;
+  decimal excedente_sobre_meta = ahorro_actual - meta_ahorro;
+  decimal gastos_totales = gastos_fijos + ocio.gastado;
+  decimal porcentaje_deuda = deudas.gastado / ingreso * 100.0;
+
+  mostrar("=== DIAGNOSTICO DEL PRESUPUESTO ===");
+  mostrar("Ingreso mensual: " + ingreso);
+  mostrar("Gastos esenciales: " + esenciales);
+  mostrar("Pago de deudas: " + deudas.gastado);
+  mostrar("Gasto total planeado: " + gastos_totales);
+  mostrar("Porcentaje del ingreso destinado a deuda: " + porcentaje_deuda);
+
+  si (gastos_totales > ingreso) {
+    alerta("El plan supera el ingreso. Hay que recortar gastos variables.");
+  } sino {
+    mostrar("El plan cabe dentro del ingreso.");
+  }
+
+  si (ahorro_actual >= meta_ahorro) {
+    mostrar("Meta de ahorro alcanzable: " + ahorro_actual);
+    mostrar("Ahorro extra sobre la meta: " + excedente_sobre_meta);
+  } sino {
+    decimal recorte_necesario = meta_ahorro - ahorro_actual;
+    alerta("Falta para la meta de ahorro: " + recorte_necesario);
+    si (ocio.gastado > recorte_necesario) {
+      mostrar("Solucion: reducir ocio al menos " + recorte_necesario);
+    } sino {
+      alerta("El ocio no alcanza para cubrir el faltante; renegocia deuda o busca ingreso extra.");
+    }
+  }
+
+  si (porcentaje_deuda > 20.0) {
+    alerta("La deuda supera el 20 por ciento del ingreso; prioriza evitar nuevas compras a credito.");
+  } sino {
+    mostrar("La carga de deuda esta dentro del umbral del 20 por ciento.");
+  }
+
+  si (vivienda.gastado > vivienda.limite) { alerta("Renta sobre el limite."); }
+  si (servicios.gastado > servicios.limite) { alerta("Servicios sobre el limite."); }
+  si (alimentos.gastado > alimentos.limite) { alerta("Alimentos sobre el limite."); }
+  si (transporte.gastado > transporte.limite) { alerta("Transporte sobre el limite."); }
+  si (deudas.gastado > deudas.limite) { alerta("Deuda sobre el limite."); }
+  si (ocio.gastado > ocio.limite) { alerta("Ocio sobre el limite."); }
+
+  mostrar("Reserva sugerida para emergencias: " + reserva_emergencia);
+  mostrar("Disponible despues de separar reserva: " + (ahorro_actual - reserva_emergencia));
+}

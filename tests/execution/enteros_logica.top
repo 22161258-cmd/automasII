@@ -5,7 +5,7 @@ presupuesto "Enteros y logica" {
   entero c = a * b + 20 - (a - b);
   logico p = a > b;
   logico q = no p o (c == 1);
-  texto saludo = "Hola, límite ñ";
+  texto saludo = "Hola, límite";
   mostrar(saludo);
   mostrar(c);
   mostrar(-c);
